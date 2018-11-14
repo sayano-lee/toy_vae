@@ -17,7 +17,7 @@ parser.add_argument('--batch_size', type=int, default=1,
                     help='batch size for training')
 parser.add_argument('--loader', type=str, default='PIL.color',
                     help='datasets loader for training')
-parser.add_argument('--resize', type=int, default=28,
+parser.add_argument('--resize', type=int, default=512,
                     help='resize for training images')
 parser.add_argument('--interval', type=int, default=1000,
                     help='save per interval iterations')
@@ -32,7 +32,7 @@ def train(loader, model):
 
 if __name__ == '__main__':
 	
-	MODEL = VAE(nz=20, nc=3, ndf=64, ngf=64, nlatent=2048)
+	MODEL = VAE(nz=20, nc=3, ndf=64, ngf=64, nlatent=1024)
 	
 	TRAINSET = TrainSet(root=opts.root, loader=opts.loader,
 	                    transform=transforms.Compose([
