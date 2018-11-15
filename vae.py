@@ -47,33 +47,35 @@ class Encoder(nn.Module):
         self.max_pool2x2 = nn.MaxPool2d(kernel_size=2)
         
     def forward(self, x):
-        print('original size {}'.format(x.shape))
+        # print('original size {}'.format(x.shape))
 
         y1 = self.lrelu(self.conv1(x))            #(bn, nc, in_size/2, in_size/2)
-        print('conv1 shape {}'.format(y1.shape))
+        # print('conv1 shape {}'.format(y1.shape))
 
         y2 = self.lrelu(self.bn2(self.conv2(y1))) #(bn, nc, in_size/4, in_size/4)
         y2 = y2 + self.max_pool2x2(y1)
-        print('conv2 shape {}'.format(y2.shape))
+        # print('conv2 shape {}'.format(y2.shape))
 
         y3 = self.lrelu(self.bn3(self.conv3(y2))) #(bn, nc, in_size/8, in_size/8)
         # y3 = y3 + self.max_pool2x2(y2)
-        print('conv3 shape {}'.format(y3.shape))
+        # print('conv3 shape {}'.format(y3.shape))
 
         y4 = self.lrelu(self.bn4(self.conv4(y3))) #(bn, nc, in_size/16, in_size/16)
         y4 = y4 + self.max_pool2x2(y3)
-        print('conv4 shape {}'.format(y4.shape))
+        # print('conv4 shape {}'.format(y4.shape))
 
         y5 = self.lrelu(self.bn5(self.conv5(y4))) #(bn, nc, in_size/32, in_size/32)
         # y5 = y5 + self.max_pool2x2(y4)
-        print('conv5 shape {}'.format(y5.shape))
+        # print('conv5 shape {}'.format(y5.shape))
 
         y6 = self.lrelu(self.bn6(self.conv6(y5))) #(bn, nc, in_size/64, in_size/64)
-        print('conv6 shape {}'.format(y6.shape))
+        # print('conv6 shape {}'.format(y6.shape))
         
         y7 = self.conv7(y6)
         
-        out = self.sigmoid(y7)
+        # out = self.sigmoid(y7)
+
+        out = y7
         
         return out
     
@@ -126,6 +128,7 @@ class Decoder(nn.Module):
         y7 = self.deconv7(y6)
         
         out = self.sigmoid(y7)
+        # out = y7
     
         return out
 
@@ -136,8 +139,8 @@ class VAE(nn.Module):
         self.have_cuda = False
         self.nz = nz
         self.nlatent = nlatent
-        
-        
+
+
         self.encoder = Encoder(nc, ndf, nlatent)
         self.decoder = Decoder(nc, ngf, nlatent)
 
@@ -154,16 +157,15 @@ class VAE(nn.Module):
 
     def encode(self, x):
         conv = self.encoder(x)
-        h1 = self.fc1(conv.view(-1, self.nlatent))
-        return self.fc21(h1), self.fc22(h1)
+        # h1 = self.fc1(conv.view(-1, self.nlatent))
+        # return self.fc21(h1), self.fc22(h1)
+        return conv
 
     def decode(self, z):
-        h3 = self.relu(self.fc3(z))
-        deconv_input = self.fc4(h3)
-        deconv_input = deconv_input.view(-1, self.nlatent, 1, 1)
-        decoded = self.decoder(deconv_input)
-        import ipdb
-        ipdb.set_trace()
+        # h3 = self.relu(self.fc3(z))
+        # deconv_input = self.fc4(h3)
+        # deconv_input = deconv_input.view(-1, self.nlatent, 1, 1)
+        decoded = self.decoder(z)
         return decoded
 
     def reparametrize(self, mu, logvar):
@@ -176,7 +178,6 @@ class VAE(nn.Module):
         return eps.mul(std).add_(mu)
 
     def forward(self, x):
-        mu, logvar = self.encode(x)
-        z = self.reparametrize(mu, logvar)
-        decoded = self.decode(z)
-        return decoded, mu, logvar
+        feat = self.encode(x)
+        decoded = self.decode(feat)
+        return decoded
