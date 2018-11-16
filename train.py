@@ -6,7 +6,9 @@ import torchvision
 from torchvision.utils import save_image
 from torchvision import transforms
 
+
 from tensorboardX import SummaryWriter
+
 
 from os.path import join as opj
 from os.path import expanduser as ope
@@ -14,6 +16,7 @@ from os.path import expanduser as ope
 import argparse
 
 parser = argparse.ArgumentParser(description='arguments for VAE trainer')
+
 parser.add_argument('--root', type=str, default=opj(ope('~'), 'Documents', 'datasets', 'MSRA-TD500', 'trainim'),
                     help='datasets root for training VAE (default MSRA-TD500)')
 parser.add_argument('--batch_size', type=int, default=15,
@@ -29,6 +32,7 @@ parser.add_argument('--log_path', type=str, default=opj(ope('~'), 'codes', 'toy_
 parser.add_argument('--lr', type=float, default=0.0001, help='learning rate for optimizer')
 parser.add_argument('--weight_decay', type=float, default=0.00001, help='weight decay rate for optimizer')
 
+
 opts = parser.parse_args()
 
 
@@ -37,10 +41,13 @@ def loss_function(recon_x, x, bs, mu=None, logvar=None):
 	# BCE = F.binary_cross_entropy(recon_x.view(bs, -1), x.view(bs, -1))
 	# import ipdb
 	# ipdb.set_trace()
+
 	# BCE = F.binary_cross_entropy(recon_x, x)
 	# import ipdb
 	# ipdb.set_trace()
 	MSE = F.mse_loss(recon_x, x)
+
+
 	# pixel_avg_bce = BCE/(x.shape[-1]*x.shape[-2])
 	# see Appendix B from VAE paper:
 	# Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
@@ -52,18 +59,21 @@ def loss_function(recon_x, x, bs, mu=None, logvar=None):
 	# import ipdb
 	# ipdb.set_trace()
 	# return pixel_avg_bce + 5*KLD, pixel_avg_bce, KLD
+
 	return MSE
 
 def train(loader, model, optim, writer):
 	epoch = 0
 	while(True):
 		epoch += 1
+
 		for cnt, (data, _) in enumerate(loader):
 			# import ipdb
 			# ipdb.set_trace()
 			# decoded, mu, logvar = model(data)
 			decoded = model(data)
 			# loss, bce, kld = loss_function(decoded, data, mu, logvar, opts.batch_size)
+
 			loss = loss_function(decoded, data, opts.batch_size)
 			
 			optim.zero_grad()
@@ -74,6 +84,16 @@ def train(loader, model, optim, writer):
 				writer.add_scalar('loss', '{:.4f}'.format(loss.item()), cnt)
 			
 			print("training iter {} in epoch {}, loss {:.4f}".format(cnt+1, epoch, loss.item()))
+
+			bce = loss_function(decoded, data, opts.batch_size)
+			
+			optim.zero_grad()
+			# loss.backward()
+			bce.backward()
+			optim.step()
+			
+			print("training iter {}, loss {:.4f}".format(cnt+1, bce.item()))
+
 		
 
 
@@ -88,6 +108,7 @@ if __name__ == '__main__':
 	
 	LOADER = torch.utils.data.DataLoader(TRAINSET, batch_size=opts.batch_size)
 	
+
 	OPTIMIZER = torch.optim.Adam(params=MODEL.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
 
 	WRITER = SummaryWriter(opts.log_path)
@@ -95,3 +116,4 @@ if __name__ == '__main__':
 	# ipdb.set_trace()
 
 	train(loader=LOADER, model=MODEL, optim=OPTIMIZER, writer=WRITER)
+

@@ -40,7 +40,9 @@ class Encoder(nn.Module):
         self.bn6 = nn.BatchNorm2d(ndf*16)
         
         # last convolutional layer
+
         self.conv7 = nn.Conv2d(ndf*16, nlatent, kernel_size=4, stride=1, padding=0, bias=False)
+
 
         self.lrelu = nn.LeakyReLU(0.2, inplace=True)
         self.sigmoid = nn.Sigmoid()
@@ -71,8 +73,6 @@ class Encoder(nn.Module):
         y6 = self.lrelu(self.bn6(self.conv6(y5))) #(bn, nc, in_size/64, in_size/64)
         # print('conv6 shape {}'.format(y6.shape))
 
-        # import ipdb
-        # ipdb.set_trace()
         
         y7 = self.conv7(y6)
         
@@ -91,7 +91,9 @@ class Decoder(nn.Module):
 
         super(Decoder, self).__init__()
         
+
         self.deconv1 = nn.ConvTranspose2d(nlatent, ngf*16, kernel_size=4, stride=1, padding=0, bias=False)
+
         self.bn1 = nn.BatchNorm2d(ngf*16)
         
         self.deconv2 = nn.ConvTranspose2d(ngf*16, ngf*16, kernel_size=4, stride=2, padding=1, bias=False)
@@ -130,9 +132,15 @@ class Decoder(nn.Module):
         
         y7 = self.deconv7(y6)
 
+
         
         # out = self.sigmoid(y7)
         out = y7
+
+        
+        out = self.sigmoid(y7)
+        # out = y7
+
     
         return out
 
