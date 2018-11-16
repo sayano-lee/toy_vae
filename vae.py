@@ -43,7 +43,6 @@ class Encoder(nn.Module):
 
         self.conv7 = nn.Conv2d(ndf*16, nlatent, kernel_size=4, stride=1, padding=0, bias=False)
 
-
         self.lrelu = nn.LeakyReLU(0.2, inplace=True)
         self.sigmoid = nn.Sigmoid()
         self.max_pool2x2 = nn.MaxPool2d(kernel_size=2)
@@ -73,7 +72,6 @@ class Encoder(nn.Module):
         y6 = self.lrelu(self.bn6(self.conv6(y5))) #(bn, nc, in_size/64, in_size/64)
         # print('conv6 shape {}'.format(y6.shape))
 
-        
         y7 = self.conv7(y6)
         
         # out = self.sigmoid(y7)
@@ -81,7 +79,8 @@ class Encoder(nn.Module):
         out = y7
         
         return out
-    
+
+
 class Decoder(nn.Module):
 
     def __init__(self, nc, ngf, nlatent):
@@ -90,7 +89,6 @@ class Decoder(nn.Module):
         # nlatent = 1024 extracted latent variable dimension
 
         super(Decoder, self).__init__()
-        
 
         self.deconv1 = nn.ConvTranspose2d(nlatent, ngf*16, kernel_size=4, stride=1, padding=0, bias=False)
 
@@ -132,17 +130,11 @@ class Decoder(nn.Module):
         
         y7 = self.deconv7(y6)
 
-
-        
         # out = self.sigmoid(y7)
         out = y7
 
-        
-        out = self.sigmoid(y7)
-        # out = y7
-
-    
         return out
+
 
 class VAE(nn.Module):
     def __init__(self, nz, nc, ndf, ngf, nlatent):
@@ -151,7 +143,6 @@ class VAE(nn.Module):
         self.have_cuda = False
         self.nz = nz
         self.nlatent = nlatent
-
 
         self.encoder = Encoder(nc, ndf, nlatent)
         self.decoder = Decoder(nc, ngf, nlatent)

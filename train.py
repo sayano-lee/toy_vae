@@ -43,8 +43,6 @@ def loss_function(recon_x, x, bs, mu=None, logvar=None):
 	# ipdb.set_trace()
 
 	# BCE = F.binary_cross_entropy(recon_x, x)
-	# import ipdb
-	# ipdb.set_trace()
 	MSE = F.mse_loss(recon_x, x)
 
 
@@ -81,20 +79,11 @@ def train(loader, model, optim, writer):
 			optim.step()
 
 			if cnt % opts.log_interval == 0:
-				writer.add_scalar('loss', '{:.4f}'.format(loss.item()), cnt)
-			
+				# import ipdb
+				# ipdb.set_trace()
+				writer.add_scalar('loss', float('{:.4f}'.format(loss.item())), cnt)
+
 			print("training iter {} in epoch {}, loss {:.4f}".format(cnt+1, epoch, loss.item()))
-
-			bce = loss_function(decoded, data, opts.batch_size)
-			
-			optim.zero_grad()
-			# loss.backward()
-			bce.backward()
-			optim.step()
-			
-			print("training iter {}, loss {:.4f}".format(cnt+1, bce.item()))
-
-		
 
 
 if __name__ == '__main__':
