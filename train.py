@@ -31,10 +31,15 @@ parser.add_argument('--log_interval', type=int, default=5, help='save log interv
 parser.add_argument('--log_path', type=str, default=opj(ope('~'), 'codes', 'toy_vae', 'tensorboard'))
 parser.add_argument('--lr', type=float, default=0.0001, help='learning rate for optimizer')
 parser.add_argument('--weight_decay', type=float, default=0.00001, help='weight decay rate for optimizer')
-
+parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
 
 opts = parser.parse_args()
 
+opts.device = None
+if not opts.disable_cuda and torch.cuda.is_available():
+    opts.device = torch.device('cuda')
+else:
+    opts.device = torch.device('cpu')
 
 def loss_function(recon_x, x, bs, mu=None, logvar=None):
 	# print(recon_x.size(), x.size())
@@ -68,6 +73,10 @@ def train(loader, model, optim, writer):
 		for cnt, (data, _) in enumerate(loader):
 			# import ipdb
 			# ipdb.set_trace()
+			data = data.to(opts.device)
+			# data.cuda()
+			# import ipdb
+			# ipdb.set_trace()
 			# decoded, mu, logvar = model(data)
 			decoded = model(data)
 			# loss, bce, kld = loss_function(decoded, data, mu, logvar, opts.batch_size)
@@ -81,7 +90,10 @@ def train(loader, model, optim, writer):
 			if cnt % opts.log_interval == 0:
 				# import ipdb
 				# ipdb.set_trace()
-				writer.add_scalar('loss', float('{:.4f}'.format(loss.item())), cnt)
+				# writer.add_scalar('loss', '{:.4f}'.format(loss.item()), cnt)
+				import ipdb
+				ipdb.set_trace()
+				writer.add_scalar('loss', loss.item(), cnt)
 
 			print("training iter {} in epoch {}, loss {:.4f}".format(cnt+1, epoch, loss.item()))
 
@@ -89,6 +101,11 @@ def train(loader, model, optim, writer):
 if __name__ == '__main__':
 	
 	MODEL = VAE(nz=20, nc=3, ndf=64, ngf=64, nlatent=1024)
+
+	MODEL.to(opts.device)
+	# MODEL.cuda()
+	# import ipdb
+	# ipdb.set_trace()
 	
 	TRAINSET = TrainSet(root=opts.root, loader=opts.loader,
 	                    transform=transforms.Compose([

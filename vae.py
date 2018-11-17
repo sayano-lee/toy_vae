@@ -147,6 +147,9 @@ class VAE(nn.Module):
         self.encoder = Encoder(nc, ndf, nlatent)
         self.decoder = Decoder(nc, ngf, nlatent)
 
+        # self.encoder.cuda()
+        # self.decoder.cuda()
+
         self.fc1 = nn.Linear(nlatent, 512)
         self.fc21 = nn.Linear(512, nz)
         self.fc22 = nn.Linear(512, nz)
