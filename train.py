@@ -67,19 +67,16 @@ def loss_function(recon_x, x, bs, mu=None, logvar=None):
 
 def train(loader, model, optim, writer):
 	epoch = 0
+	count = 0
+	length = len(loader)
+	# import ipdb
+	# ipdb.set_trace()
 	while(True):
-		epoch += 1
 
 		for cnt, (data, _) in enumerate(loader):
-			# import ipdb
-			# ipdb.set_trace()
+			count += 1
 			data = data.to(opts.device)
-			# data.cuda()
-			# import ipdb
-			# ipdb.set_trace()
-			# decoded, mu, logvar = model(data)
 			decoded = model(data)
-			# loss, bce, kld = loss_function(decoded, data, mu, logvar, opts.batch_size)
 
 			loss = loss_function(decoded, data, opts.batch_size)
 			
@@ -87,15 +84,12 @@ def train(loader, model, optim, writer):
 			loss.backward()
 			optim.step()
 
-			if cnt % opts.log_interval == 0:
-				# import ipdb
-				# ipdb.set_trace()
-				# writer.add_scalar('loss', '{:.4f}'.format(loss.item()), cnt)
-				import ipdb
-				ipdb.set_trace()
-				writer.add_scalar('loss', loss.item(), cnt)
+			if (cnt+1) % opts.log_interval == 0:
+				writer.add_scalar('loss', float('{:.4f}'.format(loss.item())), count)
+				# writer.add_scalar('loss', loss.item(), cnt)
 
-			print("training iter {} in epoch {}, loss {:.4f}".format(cnt+1, epoch, loss.item()))
+			print("training iter {} in epoch {}, loss {:.4f}".format(cnt, epoch, loss.item()))
+			epoch += 1
 
 
 if __name__ == '__main__':
@@ -112,7 +106,7 @@ if __name__ == '__main__':
 		                          transforms.Resize((opts.resize, opts.resize)),
 		                          transforms.ToTensor()]))
 	
-	LOADER = torch.utils.data.DataLoader(TRAINSET, batch_size=opts.batch_size)
+	LOADER = torch.utils.data.DataLoader(TRAINSET, batch_size=opts.batch_size, shuffle=True)
 	
 
 	OPTIMIZER = torch.optim.Adam(params=MODEL.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)

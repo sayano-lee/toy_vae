@@ -116,3 +116,4 @@ dmypy.json
 # by sayano
 .idea
 *.png
+venv
